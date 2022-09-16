@@ -1,5 +1,6 @@
-import 'dart:html';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+//import 'SecondPageClass.dart';
 
 void main() {
   runApp(MyApp());
@@ -8,52 +9,154 @@ void main() {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(title: 'TODO app', home: MyHomePage());
+    return MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: 'TODO app',
+        theme: ThemeData(
+          primarySwatch: Colors.deepPurple,
+        ),
+        home: HomePageClass());
   }
 }
 
-class MyHomePage extends StatelessWidget {
+class TodoClass {
+  TodoClass({required this.name, required this.status});
+  String name; //String? name;
+  bool status;
+  //ta in en funktion tex void birthday()? anropa: TodoClass.birthday();
+
+  get todoList => TodoClass;
+}
+
+class HomePageClass extends StatefulWidget {
+  const HomePageClass({Key? key}) : super(key: key);
+
+  @override
+  _HomePageClassState createState() => _HomePageClassState();
+}
+
+class _HomePageClassState extends State<HomePageClass> {
+  bool? status = false; // = TodoClass this.status
+  final List<TodoClass> todoList = [
+    TodoClass(name: '1', status: true),
+    TodoClass(name: '2', status: true),
+    TodoClass(name: '3', status: false)
+  ];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color.fromARGB(255, 146, 193, 255),
       appBar: AppBar(
-        title: Text("TODO list!"),
+        title: Text("ToDo list"),
         centerTitle: true,
         backgroundColor: Color.fromARGB(255, 42, 53, 158),
-        actions: <Widget>[
-          IconButton(
-            icon: Icon(
-              Icons.more_vert,
+      ),
+      //_VertIconFilterWidget(), // hur lägger jag denna rätt?
+      body: ListView.builder(
+          // ListView statisk lista?
+          itemCount: todoList.length,
+          itemBuilder: (context, index) {
+            // todo istället för index?
+            return Card(
+              margin: EdgeInsets.all(11),
               color: Colors.white,
-            ),
-            onPressed: () {},
-          ),
-        ],
-      ),
-      body: Center(
-        child: Column(
-          children: [
-            TodoList(),
-          ],
-        ),
-      ),
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: _listtileWidget(todoList[index]),
+              ),
+            );
+          }),
       floatingActionButton: FloatingActionButton(
         backgroundColor: Color.fromARGB(255, 42, 53, 158),
         tooltip: 'Add a TODO',
         child: const Icon(Icons.add),
-        onPressed: () => Navigator.push(
-            context, MaterialPageRoute(builder: (context) => SecondPage())),
+        onPressed: () => Navigator.push(context,
+            MaterialPageRoute(builder: (context) => SecondPageClass())),
       ),
     );
   }
+
+  Widget _listtileWidget(TodoClass todo) {
+    //  listtile för att koppla samman tasks med checkbox?
+    return ListTile(
+      title: Text(todo.name),
+      leading: Checkbox(
+          value: false,
+          onChanged:
+              _onChanged), //(newValue) => setState(() => status = newValue),
+      //value: status),
+      trailing: _updateAndDeleteButtonWidget(todo),
+    );
+  }
+
+  Widget _updateAndDeleteButtonWidget(TodoClass todo) {
+    return Row(mainAxisSize: MainAxisSize.min, children: [
+      IconButton(
+        onPressed: () {
+          setState(() {
+            todoList.add(todo);
+            //todoList[todo] = text;
+          });
+        },
+        icon: Icon(Icons.edit),
+      ),
+      IconButton(
+        onPressed: () {
+          setState(() {
+            todoList.remove(todo);
+          });
+        },
+        icon: Icon(Icons.close),
+      ),
+    ]);
+  }
+
+/*Widget _VertIconFilterWidget(TodoClass todo) =>
+        IconButton(
+          icon: Icon(
+            Icons.more_vert,
+            color: Colors.white,
+          ),
+          onPressed: () {
+            PopupMenuButton(
+                onSelected: (value) {
+                  Provider.of<HomePageClass>(context, listen: false)
+                      .setFilterBy(value);
+                },
+                itemBuilder: (context) => [
+                      PopupMenuItem(child: Text('All'), value: 'all'),
+                      PopupMenuItem(child: Text('Undone'), value: 'undone'),
+                      PopupMenuItem(child: Text('Done'), value: 'done'),
+                    ]);
+          },
+        );
+      List<TodoList> todoList(list, filterBy) {
+    if (filterBy == 'all') return list;
+    if (filterBy == 'undone') return list.where((todo) => todo.toList());
+    if (filterBy == 'done') return list.where((todo) => todo.toList());
+  }*/
+
+  void _onChanged(bool? value) {}
 }
 
-class SecondPage extends StatelessWidget {
+class SecondPageClass extends StatefulWidget {
+  const SecondPageClass({Key? key}) : super(key: key);
+
+  @override
+  _SecondPageClassState createState() => _SecondPageClassState();
+}
+
+class _SecondPageClassState extends State<SecondPageClass> {
+  String text = '';
+  //final todo = List.from(todoList);
+
+  final userInput = TextEditingController();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-          title: Text("TODO list!"),
+          title: Text("ToDo list"),
           centerTitle: true,
           backgroundColor: Color.fromARGB(255, 42, 53, 158),
           leading: IconButton(
@@ -63,75 +166,46 @@ class SecondPage extends StatelessWidget {
       body: Center(
         child: Column(
           children: [
-            TextField(
-              decoration:
-                  InputDecoration(hintText: 'What would you like to add?'),
-            ),
-            Icon(
-              Icons.add,
-              color: Colors.deepPurple,
-              size: 24,
-            ),
+            //HomePageClass(), // Hur får jag todoList i HomePageClass att kunna användas i SecondPageClass?
+            _TextfieldWidget(),
+            _AddButtonWidget(),
           ],
         ),
       ),
     );
   }
-}
 
-class TodoList extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        TodoItem(
-          label: "Create checkboxes",
-        ),
-        TodoItem(
-          label: "Add class navigating to second page",
-        ),
-        TodoItem(
-          label: "Change from default color to RGB",
-        ),
-        TodoItem(
-          label: "Add app bar for second page",
-        ),
-        TodoItem(
-          label: "Add three dots in appbar",
-        ),
-        TodoItem(
-          label: "Make a PR on github",
-        ),
-        TodoItem(
-          label: "Enjoy weekend!",
-        ),
-      ],
-    );
-  }
-}
+  Widget _TextfieldWidget() => TextField(
+      // argument: TodoClass todo ??
+      controller: userInput,
+      decoration: InputDecoration(hintText: 'What would you like to add?'),
+      onChanged: (val) {
+        setState(() {
+          text = userInput.text;
+          //TodoList.addItem(userInput.text);
+        }); // todo.name? Hur får jag det att läggas till?
+        //Navigator.pop(context);
+      });
 
-class TodoItem extends StatelessWidget {
-  final String label;
+  Widget _AddButtonWidget() => IconButton(
+        // argument: TodoClass todo ??
+        icon: Icon(Icons.add, color: Colors.deepPurple),
+        onPressed: () {
+          setState(() {
+            text = userInput.text;
+            //TodoList.addItem(userInput.text);
+          }); // Ska det vara todoList,TodoList, todo.name eller TodoClass?
+          Navigator.pop(context);
+        },
+      );
 
-  const TodoItem({Key? key, required this.label}) : super(key: key);
+  /*Widget _AddButtonWidget() => IconButton(
+        icon: Icon(Icons.add),
+        onPressed: () => insertItem(0, TodoClass),
+      );
 
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-        child: Row(
-      children: [
-        Checkbox(
-          onChanged: (val) {},
-          value: true,
-        ), // value: false for unchecked checkboxes
-        Text(label,
-            style: TextStyle(
-              fontSize: 16.0,
-              fontWeight: FontWeight.w400,
-              color: Color.fromARGB(255, 36, 36, 143),
-            )),
-        Icon(Icons.close, color: Colors.deepPurple, size: 18),
-      ],
-    ));
-  }
+  void insertItem(int index, TodoList todo) {
+    todo.insert(index, todo);
+    key.currentState.insertItem(index); // text ist för todo?
+  }*/
 }
