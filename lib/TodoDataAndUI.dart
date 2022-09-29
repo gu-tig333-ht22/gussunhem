@@ -4,28 +4,27 @@ import 'MyState.dart';
 
 class TodoClass {
   String id;
-  String name;
-  bool? status;
+  String title;
+  bool done;
 
   TodoClass({
     required this.id,
-    required this.name,
-    required this.status,
+    required this.title,
+    this.done = false,
   });
 
   static Map<String, dynamic> toJson(TodoClass todo) {
     return {
-      'id': todo.id,
-      'name': todo.name,
-      'status': todo.status,
+      'title': todo.title,
+      'done': todo.done,
     };
   }
 
   static TodoClass fromJson(Map<String, dynamic> json) {
     return TodoClass(
       id: json['id'],
-      name: json['name'],
-      status: json['status'],
+      title: json['title'],
+      done: json['done'],
     );
   }
 }
@@ -33,17 +32,19 @@ class TodoClass {
 class TodoList extends StatelessWidget {
   final List<TodoClass> list;
 
-  TodoList(this.list, {required id, required name, required status});
+  const TodoList(this.list, {Key? key}) : super(key: key);
 
+  @override
   Widget build(BuildContext context) {
     return ListView(
       children: list
           .map(
-            (todo) => _checkbox(
+            (TodoClass todo) => _checkbox(
               context: context,
               todo: todo,
               onClicked: () {
                 var state = Provider.of<MyState>(context, listen: false);
+                state.setStatus(todo);
               },
             ),
           )
@@ -60,18 +61,19 @@ class TodoList extends StatelessWidget {
         builder: (context, state, child) => Column(
           children: [
             ListTile(
+              onTap: onClicked,
               leading: Checkbox(
-                value: todo.status,
-                onChanged: (bool? status) {
-                  Provider.of<MyState>(context, listen: false)
-                      .setStatus(status, todo);
+                value: todo.done,
+                onChanged: (bool? done) {
+                  Provider.of<MyState>(context, listen: false).setStatus(todo);
                 },
               ),
               trailing: _deleteButtonWidget(context, todo),
               title: Text(
-                todo.name,
-                style: TextStyle(
+                todo.title,
+                style: const TextStyle(
                   fontSize: 18,
+                  fontFamily: 'Merriweather',
                 ),
               ),
             ),
@@ -85,7 +87,7 @@ class TodoList extends StatelessWidget {
   Widget _deleteButtonWidget(context, todo) {
     return Row(mainAxisSize: MainAxisSize.min, children: [
       IconButton(
-        icon: Icon(Icons.close, size: 19),
+        icon: const Icon(Icons.close, size: 19),
         onPressed: () async {
           var state = Provider.of<MyState>(context, listen: false);
           state.removeTodo(todo);

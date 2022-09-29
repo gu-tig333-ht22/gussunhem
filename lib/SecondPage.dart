@@ -19,15 +19,15 @@ class SecondPageState extends State<SecondPage> {
   }
 
   @override
-  void dispose() {
-    textInput.dispose();
-    super.dispose();
-  }
-
-  @override
   void initState() {
     super.initState();
     textInput = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    textInput.dispose();
+    super.dispose();
   }
 
   @override
@@ -78,6 +78,7 @@ class SecondPageState extends State<SecondPage> {
         child: ElevatedButton.icon(
       onPressed: () {
         if (_formKey.currentState!.validate()) {
+          // != null
           Navigator.pop(
             context,
             textInput.text,

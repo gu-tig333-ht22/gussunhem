@@ -1,31 +1,16 @@
 import 'package:flutter/material.dart';
-import 'Todo.dart';
-import 'internet.dart';
+import 'TodoDataAndUI.dart';
+import 'api.dart';
 
 class MyState extends ChangeNotifier {
-  late List<TodoClass> _list = [];
+  List<TodoClass> _list = [];
   String _filterBy = 'all';
-  //String _ip = '';
-  //bool _loading = false;
-  //String get ip => _ip;
-  //bool get loading => _loading;
 
-  /*MyState() {
-    fetchIp();
+  MyState() {
+    getTodo();
   }
 
-  void fetchIp() async {
-    _loading = true;
-    notifyListeners();
-
-    var ip = await InternetFetcher.fetchIp();
-    _loading = false;
-
-    _ip = ip;
-    notifyListeners(); */
-
   List<TodoClass> get list => _list;
-
   String get filterBy => _filterBy;
 
   Future getTodo() async {
@@ -34,22 +19,19 @@ class MyState extends ChangeNotifier {
     notifyListeners();
   }
 
-  void addTodo(String todo) async {
-    String id = '1';
-    TodoClass input = TodoClass(id: id, name: todo, status: false);
-    _list.add(input); // await InternetFetcher._list.add(input);
+  void addTodo(TodoClass todo) async {
+    _list = await InternetFetcher.addTodo(todo);
     notifyListeners();
   }
 
-  void setStatus(bool? status, todo) async {
-    todo.status =
-        status; //todo.status = await InternetFetcher.status; The getter 'status' isn't defined for the type 'InternetFetcher'.
+  void setStatus(todo) async {
+    todo.done = !todo.done;
+    _list = await InternetFetcher.updateTodo(todo);
     notifyListeners();
   }
 
-  void removeTodo(TodoClass todoToRemove) {
-    _list.remove(
-        todoToRemove); // await InternetFetcher._list.remove(todoToRemove);
+  void removeTodo(TodoClass todoToRemove) async {
+    _list = await InternetFetcher.removeTodo(todoToRemove);
     notifyListeners();
   }
 
